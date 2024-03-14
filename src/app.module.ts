@@ -10,7 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
       host: '127.0.0.1',
       port: 3306,
       username: 'root',
-      password: 'Fprilo21',
+      password: 'root',
       database: 'fans_crm',
       autoLoadModels: true,
       synchronize: true,
