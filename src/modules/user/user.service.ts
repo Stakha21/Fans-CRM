@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersRepository } from '../../infrastructure/repository/user.repository';
 import { User } from '../../domain/user';
@@ -7,12 +7,14 @@ import { createPasswordHash } from '../../helpers/create-password-hash';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger();
+
   constructor(private readonly userRepository: UsersRepository) {}
 
   async create(createUserDto: CreateUserDto): Promise<User | Error> {
     const { email, password } = createUserDto;
 
-    const user = await this.userRepository.getByEmail(email);
+    let user = await this.userRepository.getByEmail(email);
 
     if (!(user instanceof Error)) {
       return new Error(ErrorType.INVALID_ARGUMENTS);
@@ -20,14 +22,22 @@ export class UsersService {
 
     const { salt, passwordHash } = await createPasswordHash(password);
 
-    return this.userRepository.create({
+    user = await this.userRepository.create({
       email,
       salt,
       hash: passwordHash,
     });
+
+    this.logger.log(user);
+
+    return user;
   }
 
   async get(referenceId: string): Promise<User | Error> {
-    return this.userRepository.get(referenceId);
+    const user = await this.userRepository.get(referenceId);
+
+    this.logger.log(user);
+
+    return user;
   }
 }
